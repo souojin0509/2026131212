@@ -76,37 +76,37 @@ const questions = [
 const results = {
   planner: {
     title: "계획형 전략가",
-    desc: "당신은 목표를 세우고 차근차근 실행할 때 가장 안정적으로 성과를 내는 타입입니다. 흐름을 직접 설계할수록 집중력이 올라가요.",
+    desc: "목표를 세우고 차근차근 실행할 때 가장 안정적으로 성과를 내는 타입입니다. 흐름을 직접 설계할수록 집중력이 올라가요.",
     tips: [
-      "하루 공부량을 너무 크게 잡지 말고 작게 나누세요.",
+      "하루 공부량을 작게 나누어 실천하세요.",
       "체크리스트를 활용해 완료감을 느껴보세요.",
-      "예비 시간을 반드시 넣어 계획이 무너지지 않게 하세요."
+      "예비 시간을 넣어 계획이 무너지지 않게 하세요."
     ],
-    place: "조용한 도서관, 스터디룸, 책상이 잘 정돈된 공간"
+    place: "조용한 도서관, 스터디룸, 정돈된 책상"
   },
   survivor: {
     title: "벼락치기 생존형",
-    desc: "당신은 압박감이 생겼을 때 집중력이 폭발하는 타입입니다. 다만 체력 소모가 크기 때문에 최소한의 안전장치가 필요해요.",
+    desc: "압박감이 생겼을 때 집중력이 폭발하는 타입입니다. 다만 체력 소모가 크기 때문에 최소한의 안전장치가 필요해요.",
     tips: [
-      "마감 전날이 아니라 2~3일 전을 스스로의 마감으로 정하세요.",
+      "마감 전날이 아니라 2~3일 전을 개인 마감으로 정하세요.",
       "핵심 개념과 기출 중심으로 우선순위를 잡으세요.",
-      "짧은 시간 집중 후 반드시 쉬는 시간을 넣으세요."
+      "짧게 몰입하고 반드시 쉬는 시간을 넣으세요."
     ],
     place: "적당히 긴장감 있는 카페, 시험 분위기가 나는 열람실"
   },
   flow: {
     title: "감각형 몰입러",
-    desc: "당신은 분위기와 감정의 영향을 많이 받는 타입입니다. 잘 맞는 환경만 찾으면 누구보다 깊게 몰입할 수 있어요.",
+    desc: "분위기와 감정의 영향을 많이 받는 타입입니다. 잘 맞는 환경만 찾으면 누구보다 깊게 몰입할 수 있어요.",
     tips: [
       "공부 전 루틴을 만들어 몰입 스위치를 켜세요.",
-      "과목별로 어울리는 플레이리스트나 장소를 정해보세요.",
+      "과목별로 어울리는 장소나 플레이리스트를 정해보세요.",
       "기분이 좋은 시간대에 어려운 과목을 배치하세요."
     ],
     place: "잔잔한 음악이 있는 카페, 창가 자리, 분위기 좋은 독서실"
   },
   perfectionist: {
     title: "완벽주의 정리형",
-    desc: "당신은 구조화와 정리에 강한 타입입니다. 꼼꼼함이 큰 장점이지만, 시작이 늦어지지 않도록 주의하면 더 좋아요.",
+    desc: "구조화와 정리에 강한 타입입니다. 꼼꼼함이 큰 장점이지만, 시작이 늦어지지 않도록 주의하면 더 좋아요.",
     tips: [
       "정리 시간을 제한하고 문제 풀이 시간을 따로 확보하세요.",
       "완벽한 필기보다 반복 복습을 우선하세요.",
@@ -117,6 +117,7 @@ const results = {
 };
 
 let currentQuestionIndex = 0;
+let userName = "";
 let scores = {
   planner: 0,
   survivor: 0,
@@ -128,15 +129,20 @@ const startScreen = document.getElementById("start-screen");
 const quizScreen = document.getElementById("quiz-screen");
 const resultScreen = document.getElementById("result-screen");
 
+const nicknameInput = document.getElementById("nickname-input");
 const startBtn = document.getElementById("start-btn");
 const restartBtn = document.getElementById("restart-btn");
+const copyBtn = document.getElementById("copy-btn");
+const copyMessage = document.getElementById("copy-message");
 
 const questionNumber = document.getElementById("question-number");
 const totalNumber = document.getElementById("total-number");
 const progressFill = document.getElementById("progress-fill");
+const questionWrap = document.getElementById("question-wrap");
 const questionTitle = document.getElementById("question-title");
 const answerList = document.getElementById("answer-list");
 
+const resultCard = document.getElementById("result-card");
 const resultTitle = document.getElementById("result-title");
 const resultDesc = document.getElementById("result-desc");
 const resultTips = document.getElementById("result-tips");
@@ -146,6 +152,13 @@ totalNumber.textContent = questions.length;
 
 startBtn.addEventListener("click", startQuiz);
 restartBtn.addEventListener("click", restartQuiz);
+copyBtn.addEventListener("click", copyLink);
+
+nicknameInput.addEventListener("keydown", (event) => {
+  if (event.key === "Enter") {
+    startQuiz();
+  }
+});
 
 function showScreen(screen) {
   startScreen.classList.remove("active");
@@ -155,6 +168,7 @@ function showScreen(screen) {
 }
 
 function startQuiz() {
+  userName = nicknameInput.value.trim() || "당신";
   currentQuestionIndex = 0;
   resetScores();
   showScreen(quizScreen);
@@ -190,16 +204,22 @@ function renderQuestion() {
 
     answerList.appendChild(button);
   });
+
+  questionWrap.classList.remove("fade");
 }
 
 function goToNextQuestion() {
-  currentQuestionIndex += 1;
+  questionWrap.classList.add("fade");
 
-  if (currentQuestionIndex < questions.length) {
-    renderQuestion();
-  } else {
-    showResult();
-  }
+  setTimeout(() => {
+    currentQuestionIndex += 1;
+
+    if (currentQuestionIndex < questions.length) {
+      renderQuestion();
+    } else {
+      showResult();
+    }
+  }, 180);
 }
 
 function getTopType() {
@@ -220,7 +240,8 @@ function showResult() {
   const topType = getTopType();
   const result = results[topType];
 
-  resultTitle.textContent = result.title;
+  resultCard.className = `result-card ${topType}`;
+  resultTitle.textContent = `${userName}님의 공부 성향은 ${result.title}`;
   resultDesc.textContent = result.desc;
   resultPlace.textContent = result.place;
 
@@ -231,9 +252,29 @@ function showResult() {
     resultTips.appendChild(li);
   });
 
+  copyMessage.classList.remove("show");
   showScreen(resultScreen);
 }
 
 function restartQuiz() {
+  nicknameInput.value = "";
+  copyMessage.classList.remove("show");
   showScreen(startScreen);
+}
+
+async function copyLink() {
+  const url = window.location.href;
+
+  try {
+    await navigator.clipboard.writeText(url);
+    copyMessage.textContent = "링크가 복사되었습니다!";
+  } catch (error) {
+    copyMessage.textContent = "주소창의 링크를 복사해 주세요.";
+  }
+
+  copyMessage.classList.add("show");
+
+  setTimeout(() => {
+    copyMessage.classList.remove("show");
+  }, 2200);
 }
